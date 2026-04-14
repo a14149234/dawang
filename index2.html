@@ -3,19 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>个人主页</title>
+<title>主页</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,sans-serif}
 body{background:linear-gradient(135deg,#f0f4ff,#d9e2ff);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center}
 .main-title{font-size:clamp(18px,5vw,24px);color:#e63946;font-weight:bold;margin:10px 0}
 .desc{font-size:clamp(16px,4vw,18px);color:#0066ff;font-weight:bold;padding:15px 20px;border:2px dashed #0066ff;border-radius:12px;background:rgba(255,255,255,.8);cursor:pointer;margin:20px 0}
-.btn{background:#0066ff;color:white;padding:18px 50px;border-radius:50px;border:none;font-size:18px;cursor:pointer;margin:10px 0;box-shadow:0 5px 15px rgba(0,102,255,.2)}
+.btn{background:#0066ff;color:white;padding:18px 50px;border-radius:50px;border:none;font-size:18px;cursor:pointer;margin:10px;box-shadow:0 5px 15px rgba(0,102,255,.2)}
 .admin-toggle{position:fixed;top:10px;right:10px;width:30px;height:30px;opacity:0.05;cursor:pointer}
-.modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center}
 .modal-box{background:white;padding:30px;border-radius:15px;width:90%;max-width:400px}
 .modal-box input{width:100%;padding:12px;margin:10px 0;border:1px solid #ddd;border-radius:8px}
 .modal-box button{width:100%;padding:12px;background:#0066ff;color:white;border:none;border-radius:8px;margin-top:10px}
-.admin-panel{position:fixed;top:0;left:0;width:100%;height:100%;background:white;overflow:auto;padding:20px;display:none}
+.admin-panel{position:fixed;inset:0;background:white;overflow:auto;padding:20px;display:none}
 .table{width:100%;border-collapse:collapse;margin-top:20px}
 .table th,.table td{padding:10px;border:1px solid #ddd;text-align:left}
 .table th{background:#f0f4ff}
@@ -26,8 +26,8 @@ body{background:linear-gradient(135deg,#f0f4ff,#d9e2ff);min-height:100vh;display
 <!-- 隐形后台入口 -->
 <div class="admin-toggle" id="adminBtn"></div>
 
-<!-- 前台内容 -->
-<div class="main-title">通过Instagram搜索联系我</div>
+<!-- 前台 -->
+<div class="main-title">通过Instagram联系我</div>
 <div class="desc" id="copyIg">schs166</div>
 <div class="main-title">点击账号复制 · 关注后发消息</div>
 <button class="btn" onclick="openIg()">打开Instagram</button>
@@ -36,128 +36,124 @@ body{background:linear-gradient(135deg,#f0f4ff,#d9e2ff);min-height:100vh;display
 <div class="modal" id="loginModal">
   <div class="modal-box">
     <h3>管理员登录</h3>
-    <input type="password" id="password" placeholder="输入管理员密码">
-    <button onclick="adminLogin()">登录</button>
+    <input type="password" id="pwd" placeholder="输入密码">
+    <button onclick="login()">登录</button>
   </div>
 </div>
 
-<!-- 后台管理面板 -->
+<!-- 后台 -->
 <div class="admin-panel" id="adminPanel">
-  <h2>访问数据管理</h2>
-  <p style="margin:10px 0">总访客：<span id="total"></span></p>
-  <button onclick="logout()" style="padding:8px 16px;background:red;color:white;border:none;border-radius:8px">退出后台</button>
+  <h2>访问记录管理</h2>
+  <p style="margin:10px 0">总独立访客：<span id="total"></span></p>
+  <button onclick="logout()" style="padding:8px 16px;background:red;color:white;border:none;border-radius:8px">退出</button>
   <table class="table">
-    <thead>
-      <tr><th>IP</th><th>地区</th><th>首次访问</th><th>最后访问</th><th>次数</th></tr>
-    </thead>
-    <tbody id="recordList"></tbody>
+    <thead><tr><th>IP</th><th>地区</th><th>首次访问</th><th>最后访问</th><th>次数</th></tr></thead>
+    <tbody id="list"></tbody>
   </table>
 </div>
 
 <script>
-// ==============================================
-// ✅ 安全配置：这里存的是【加密后的密码】，看不到原文
-// ==============================================
-const CONFIG = {
-  // 👇 默认密码：123456   想改密码？看下面教程
-  HASHED_PASSWORD: "a03c32fcd351cba2d9738622b083bed022ef07793bd92b59faea0207653f371d",
-  IG_ACCOUNT: "schs166",
-  IG_URL: "https://www.instagram.com/schs166"
-};
+// ==================== 配置 ====================
+const IG = "schs166";
+const IG_URL = "https://www.instagram.com/schs166";
 
-// 打开后台入口
-document.getElementById("adminBtn").onclick = () => {
+// 隐形入口
+document.getElementById("adminBtn").onclick = ()=>{
   document.getElementById("loginModal").style.display = "flex";
 };
 
-// 加密密码（SHA256）
-async function hash(str) {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(str);
-  const digest = await crypto.subtle.digest("SHA-256", data);
-  return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, "0")).join("");
+// SHA256 加密
+async function sha256(s){
+  const enc = new TextEncoder();
+  const d = enc.encode(s);
+  const h = await crypto.subtle.digest("SHA-256", d);
+  return Array.from(new Uint8Array(h)).map(b=>b.toString(16).padStart(2,"0")).join("");
 }
 
-// 管理员登录
-async function adminLogin() {
-  const input = document.getElementById("password").value;
-  const inputHash = await hash(input);
-  if (inputHash === CONFIG.HASHED_PASSWORD) {
+// 登录（密码不存在代码里！）
+async function login(){
+  const v = document.getElementById("pwd").value;
+  const h = await sha256(v);
+  const key = localStorage.getItem("ADMIN_HASH");
+
+  if(!key){
+    // 第一次使用：设置密码
+    localStorage.setItem("ADMIN_HASH", h);
     document.getElementById("loginModal").style.display = "none";
     document.getElementById("adminPanel").style.display = "block";
     loadRecords();
-  } else alert("密码错误");
+    alert("首次使用，密码已设置成功！");
+  }else{
+    if(h === key){
+      document.getElementById("loginModal").style.display = "none";
+      document.getElementById("adminPanel").style.display = "block";
+      loadRecords();
+    }else{
+      alert("密码错误");
+    }
+  }
 }
 
-// 退出登录
-function logout() {
+function logout(){
   document.getElementById("adminPanel").style.display = "none";
-  document.getElementById("password").value = "";
+  document.getElementById("pwd").value = "";
 }
 
-// 复制账号
-document.getElementById("copyIg").onclick = () => {
-  navigator.clipboard.writeText(CONFIG.IG_ACCOUNT);
-  alert("复制成功：" + CONFIG.IG_ACCOUNT);
+// 复制
+document.getElementById("copyIg").onclick = async ()=>{
+  await navigator.clipboard.writeText(IG);
+  alert("复制成功："+IG);
 };
+function openIg(){ window.open(IG_URL, "_blank") }
 
-function openIg() { window.open(CONFIG.IG_URL, "_blank") }
-
-// ==============================================
-// 访问记录：IP + 地区 + 时间 + 次数
-// ==============================================
-async function getIPInfo() {
-  try {
-    let r = await fetch("https://ipapi.co/json/");
-    return await r.json();
-  } catch(e) {
-    return { ip: "未知", region: "未知", city: "未知" };
+// ============== IP 记录 ==============
+async function getIP(){
+  try{
+    const res = await fetch("https://ipapi.co/json/");
+    return await res.json();
+  }catch(e){
+    return {ip:"未知",region:"",city:""};
   }
 }
 
-function saveRecords(data) {
-  localStorage.setItem("visitorRecords", JSON.stringify(data));
+function getRecords(){
+  return JSON.parse(localStorage.getItem("RECORDS")||"[]");
+}
+function setRecords(d){
+  localStorage.setItem("RECORDS", JSON.stringify(d));
 }
 
-function getRecords() {
-  return JSON.parse(localStorage.getItem("visitorRecords") || "[]");
-}
-
-async function record() {
-  const info = await getIPInfo();
-  const records = getRecords();
+async function recordVisit(){
+  const {ip,region,city} = await getIP();
+  const loc = (region||"") + " " + (city||"");
   const now = new Date().toLocaleString("zh-CN");
-  const ip = info.ip;
-  const region = info.region || "";
-  const city = info.city || "";
-  const location = region + " " + city;
+  const list = getRecords();
+  const item = list.find(x=>x.ip===ip);
 
-  const exist = records.find(i => i.ip === ip);
-  if (exist) {
-    exist.count++;
-    exist.last = now;
-  } else {
-    records.push({ ip, location, first: now, last: now, count: 1 });
+  if(item){
+    item.count++;
+    item.last = now;
+  }else{
+    list.push({ip, location:loc, first:now, last:now, count:1});
   }
-  saveRecords(records);
+  setRecords(list);
 }
 
-function loadRecords() {
+function loadRecords(){
   const list = getRecords();
   document.getElementById("total").textContent = list.length;
-  const html = list.map((i, idx) => `
+  document.getElementById("list").innerHTML = list.map((x,i)=>`
     <tr>
-      <td>${i.ip}</td>
-      <td>${i.location}</td>
-      <td>${i.first}</td>
-      <td>${i.last}</td>
-      <td>${i.count}</td>
+      <td>${x.ip}</td>
+      <td>${x.location}</td>
+      <td>${x.first}</td>
+      <td>${x.last}</td>
+      <td>${x.count}</td>
     </tr>
   `).join("");
-  document.getElementById("recordList").innerHTML = html;
 }
 
-window.onload = record;
+window.onload = recordVisit;
 </script>
 </body>
 </html>
