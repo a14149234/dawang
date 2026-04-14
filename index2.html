@@ -2,192 +2,162 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<!-- 手机端必加，保证所有手机显示一样 -->
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Instagram联系页</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>个人主页</title>
 <style>
-* {
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  -webkit-box-sizing:border-box;
-  -webkit-tap-highlight-color:transparent;
-}
-
-html,body{
-  width:100%;
-  height:100%;
-  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
-  background: linear-gradient(135deg, #f0f4ff 0%, #d9e2ff 100%);
-  display: flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  padding: 20px;
-  text-align:center;
-  position: relative; /* 修复底部文字定位 */
-}
-
-/* 大标题 */
-.main-title{
-  font-size: clamp(18px, 5vw, 24px); /* 响应式字体 */
-  font-weight: bold;
-  color: #e63946; /* 调整为更舒适的红色 */
-  margin-bottom: 15px;
-  line-height: 1.4;
-}
-
-/* 可复制说明文字 */
-.desc{
-  font-size: clamp(16px, 4vw, 18px);
-  color: #0066ff;
-  font-weight: bold;
-  margin: 20px 0 30px;
-  line-height: 1.6;
-  cursor: pointer;
-  padding: 15px 20px;
-  border: 2px dashed #0066ff;
-  border-radius: 12px;
-  user-select: none;
-  background-color: rgba(255, 255, 255, 0.8);
-  transition: all 0.3s ease;
-}
-.desc:hover{
-  background-color: rgba(255, 255, 255, 1);
-  border-color: #0051cc;
-}
-.desc:active{
-  opacity: 0.7;
-  transform: scale(0.98);
-}
-
-/* 按钮 */
-.btn{
-  background:#0066ff;
-  color:white;
-  font-size: clamp(16px, 4vw, 18px);
-  padding: 18px 50px;
-  border-radius: 50px;
-  border:none;
-  box-shadow: 0 5px 15px rgba(0,102,255,0.2);
-  margin: 10px 0 20px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn:hover{
-  background: #0051cc;
-  box-shadow: 0 5px 20px rgba(0,102,255,0.3);
-}
-.btn:active{
-  transform:scale(0.96);
-}
-
-/* 底部文字 */
-.footer{
-  font-size:12px;
-  color:#999;
-  position: absolute;
-  bottom:20px;
-}
-
-/* 提示信息样式 */
-.toast {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: rgba(0,0,0,0.8);
-  color: white;
-  padding: 15px 25px;
-  border-radius: 8px;
-  font-size: 16px;
-  z-index: 9999;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-}
-
-.toast.show {
-  opacity: 1;
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,sans-serif}
+body{background:linear-gradient(135deg,#f0f4ff,#d9e2ff);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center}
+.main-title{font-size:clamp(18px,5vw,24px);color:#e63946;font-weight:bold;margin:10px 0}
+.desc{font-size:clamp(16px,4vw,18px);color:#0066ff;font-weight:bold;padding:15px 20px;border:2px dashed #0066ff;border-radius:12px;background:rgba(255,255,255,.8);cursor:pointer;margin:20px 0}
+.btn{background:#0066ff;color:white;padding:18px 50px;border-radius:50px;border:none;font-size:18px;cursor:pointer;margin:10px 0;box-shadow:0 5px 15px rgba(0,102,255,.2)}
+.admin-toggle{position:fixed;top:10px;right:10px;width:30px;height:30px;opacity:0.05;cursor:pointer}
+.modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center}
+.modal-box{background:white;padding:30px;border-radius:15px;width:90%;max-width:400px}
+.modal-box input{width:100%;padding:12px;margin:10px 0;border:1px solid #ddd;border-radius:8px}
+.modal-box button{width:100%;padding:12px;background:#0066ff;color:white;border:none;border-radius:8px;margin-top:10px}
+.admin-panel{position:fixed;top:0;left:0;width:100%;height:100%;background:white;overflow:auto;padding:20px;display:none}
+.table{width:100%;border-collapse:collapse;margin-top:20px}
+.table th,.table td{padding:10px;border:1px solid #ddd;text-align:left}
+.table th{background:#f0f4ff}
 </style>
 </head>
-
 <body>
-  <!-- 提示框 -->
-  <div class="toast" id="toast"></div>
 
-  <!-- 1. 标题 -->
-  <div class="main-title">通过Instagram搜索联系我的主账号</div>
+<!-- 隐形后台入口 -->
+<div class="admin-toggle" id="adminBtn"></div>
 
-  <!-- 2. 点击可复制的文字 -->
-  <div class="desc" id="copyText">tutu85966</div>
-  
-  <!-- 引导说明 -->
-  <div class="main-title">点击上方账号可直接复制</div>
-  <div class="main-title">请先关注我再发送消息</div>
+<!-- 前台内容 -->
+<div class="main-title">通过Instagram搜索联系我</div>
+<div class="desc" id="copyIg">schs166</div>
+<div class="main-title">点击账号复制 · 关注后发消息</div>
+<button class="btn" onclick="openIg()">打开Instagram</button>
 
-  <!-- 3. 跳转按钮 -->
-  <button class="btn" onclick="openInstagram()">
-    点击这里打开Instagram聊天
-  </button>
-  
-  <div class="main-title">添加我时请主动告知你的位置，否则将不予回复</div>
+<!-- 登录弹窗 -->
+<div class="modal" id="loginModal">
+  <div class="modal-box">
+    <h3>管理员登录</h3>
+    <input type="password" id="password" placeholder="输入管理员密码">
+    <button onclick="adminLogin()">登录</button>
+  </div>
+</div>
 
-  <!-- 底部文字 -->
-  <div class="footer">© 2025 Instagram联系页</div>
+<!-- 后台管理面板 -->
+<div class="admin-panel" id="adminPanel">
+  <h2>访问数据管理</h2>
+  <p style="margin:10px 0">总访客：<span id="total"></span></p>
+  <button onclick="logout()" style="padding:8px 16px;background:red;color:white;border:none;border-radius:8px">退出后台</button>
+  <table class="table">
+    <thead>
+      <tr><th>IP</th><th>地区</th><th>首次访问</th><th>最后访问</th><th>次数</th></tr>
+    </thead>
+    <tbody id="recordList"></tbody>
+  </table>
+</div>
 
 <script>
-// 显示提示信息
-function showToast(message) {
-  const toast = document.getElementById('toast');
-  toast.innerText = message;
-  toast.classList.add('show');
-  
-  setTimeout(() => {
-    toast.classList.remove('show');
-  }, 2000);
+// ==============================================
+// ✅ 安全配置：这里存的是【加密后的密码】，看不到原文
+// ==============================================
+const CONFIG = {
+  // 👇 默认密码：123456   想改密码？看下面教程
+  HASHED_PASSWORD: "a03c32fcd351cba2d9738622b083bed022ef07793bd92b59faea0207653f371d",
+  IG_ACCOUNT: "schs166",
+  IG_URL: "https://www.instagram.com/schs166"
+};
+
+// 打开后台入口
+document.getElementById("adminBtn").onclick = () => {
+  document.getElementById("loginModal").style.display = "flex";
+};
+
+// 加密密码（SHA256）
+async function hash(str) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(str);
+  const digest = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, "0")).join("");
 }
 
-// 点击复制功能
-document.getElementById('copyText').onclick = function(){
-  const text = this.innerText;
-  
-  // 兼容旧版浏览器
-  if (!navigator.clipboard) {
-    const textArea = document.createElement('textarea');
-    textArea.value = text;
-    document.body.appendChild(textArea);
-    textArea.select();
-    document.execCommand('copy');
-    document.body.removeChild(textArea);
-    showToast('复制成功！');
-    return;
+// 管理员登录
+async function adminLogin() {
+  const input = document.getElementById("password").value;
+  const inputHash = await hash(input);
+  if (inputHash === CONFIG.HASHED_PASSWORD) {
+    document.getElementById("loginModal").style.display = "none";
+    document.getElementById("adminPanel").style.display = "block";
+    loadRecords();
+  } else alert("密码错误");
+}
+
+// 退出登录
+function logout() {
+  document.getElementById("adminPanel").style.display = "none";
+  document.getElementById("password").value = "";
+}
+
+// 复制账号
+document.getElementById("copyIg").onclick = () => {
+  navigator.clipboard.writeText(CONFIG.IG_ACCOUNT);
+  alert("复制成功：" + CONFIG.IG_ACCOUNT);
+};
+
+function openIg() { window.open(CONFIG.IG_URL, "_blank") }
+
+// ==============================================
+// 访问记录：IP + 地区 + 时间 + 次数
+// ==============================================
+async function getIPInfo() {
+  try {
+    let r = await fetch("https://ipapi.co/json/");
+    return await r.json();
+  } catch(e) {
+    return { ip: "未知", region: "未知", city: "未知" };
   }
-  
-  navigator.clipboard.writeText(text)
-    .then(() => {
-      showToast('复制成功！');
-    })
-    .catch(err => {
-      showToast('复制失败，请手动复制');
-      console.error('复制失败:', err);
-    });
 }
 
-// 打开Instagram链接
-function openInstagram() {
-  const url = 'https://www.instagram.com/tutu85996?igsh=MnU3anlsNG94enVl&utm_source=qr';
-  window.open(url, '_blank');
-  showToast('正在打开Instagram...');
+function saveRecords(data) {
+  localStorage.setItem("visitorRecords", JSON.stringify(data));
 }
 
-// 页面加载完成提示
-window.onload = function() {
-  console.log('页面加载完成，可正常使用');
+function getRecords() {
+  return JSON.parse(localStorage.getItem("visitorRecords") || "[]");
 }
+
+async function record() {
+  const info = await getIPInfo();
+  const records = getRecords();
+  const now = new Date().toLocaleString("zh-CN");
+  const ip = info.ip;
+  const region = info.region || "";
+  const city = info.city || "";
+  const location = region + " " + city;
+
+  const exist = records.find(i => i.ip === ip);
+  if (exist) {
+    exist.count++;
+    exist.last = now;
+  } else {
+    records.push({ ip, location, first: now, last: now, count: 1 });
+  }
+  saveRecords(records);
+}
+
+function loadRecords() {
+  const list = getRecords();
+  document.getElementById("total").textContent = list.length;
+  const html = list.map((i, idx) => `
+    <tr>
+      <td>${i.ip}</td>
+      <td>${i.location}</td>
+      <td>${i.first}</td>
+      <td>${i.last}</td>
+      <td>${i.count}</td>
+    </tr>
+  `).join("");
+  document.getElementById("recordList").innerHTML = html;
+}
+
+window.onload = record;
 </script>
-
 </body>
 </html>
